@@ -6,6 +6,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs")
 
 function generateRandomString() {
+  return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
 
 }
 
