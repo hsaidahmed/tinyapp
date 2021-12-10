@@ -11,7 +11,7 @@
       </div>
     </div>
     <div>
-        <% if (!username) { %>
+        <% if (!user) { %>
         <form class="form-check" action="/login" method="POST">
           <div class="form-check mb-2">
             <label for="Username">Sign in</label>
@@ -23,7 +23,7 @@
         <% } else { %>
           <form class="form-check" action="/logout" method="POST">
             <div class="form-check mb-2">
-              <label for="Username">Logged In As: <%= username %> </label>
+              <label for="Username">Logged In As: <%= user.email %> </label>
               <button type="submit" class="btn btn-primary">Logout</button>
             </div>
           </form>
