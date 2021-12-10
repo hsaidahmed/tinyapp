@@ -3,8 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const database = require("mime-db");
-const { STATUS_CODES } = require("http");
+
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -27,19 +26,19 @@ const getUserByEmail = (email) => {
     }
   }
 
-}
-const users = { 
+};
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
   "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -87,34 +86,38 @@ app.get("/register", (req, res) => {
   const user = users[userid];
   const templateVars = {user};
 
-res.render("register",templateVars);
-})
+  res.render("register",templateVars);
+});
+app.get("/login", (req, res) => {
+  const userid = req.cookies["user_id"];
+  const user = users[userid];
+  const templateVars = {user};
+  res.render("login", templateVars);
+});
 
 app.post("/register", (req, res) => {
- if (req.body.email && req.body.password) {
-   console.log(req.body.email)
-   if (!getUserByEmail(req.body.email, users)) {
+  if (req.body.email && req.body.password) {
+    console.log(req.body.email);
+    if (!getUserByEmail(req.body.email, users)) {
 
-     let id = generateRandomString();
-     const email = req.body.email;
-     const password = req.body.password;
-     users[id] = {
-       id , email, password
-     }
-     res.cookie("user_id", id);
-     res.redirect("/urls");
-   }
-   else {
-    res.statusCode = 400;   
-    res.send('Email already exists');
+      let id = generateRandomString();
+      const email = req.body.email;
+      const password = req.body.password;
+      users[id] = {
+        id , email, password
+      };
+      res.cookie("user_id", id);
+      res.redirect("/urls");
+    } else {
+      res.statusCode = 400;
+      res.send('Email already exists');
 
-   }
- }
- else {
-  res.statusCode = 400;
-  res.send('Email field cannot be empty');
+    }
+  } else {
+    res.statusCode = 400;
+    res.send('Email field cannot be empty');
   }
-})
+});
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
