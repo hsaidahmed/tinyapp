@@ -1,10 +1,13 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const morgan = require('morgan');
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcryptjs');
 
 
+app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
@@ -26,6 +29,12 @@ const urlDatabase = {
 };
 
 const getUserByEmail = (email) => {
+  // for(const user in urlDatabase) {
+  //   if(urlDatabase[user].email === email) {
+  //     return urlDatabase[user];
+  //   }
+  // }
+  // return null;
   const userVal = Object.values(users);
   // const user = users[id];
   for (const user of userVal) {
@@ -76,6 +85,7 @@ app.get("/urls", (req, res) => {
   const user = users[userid];
   const urls = urlsForUser(userid);
   const templateVars = { urls, user };
+  console.log(templateVars);
   if (!user) {
     return res.status(403).send("login first!");
   }
@@ -118,8 +128,11 @@ app.get("/register", (req, res) => {
     res.redirect("/urls");
     return;
   }
-
-  res.render("register", {user});
+  // if (req.cookies["user_id"]) {
+  //   return res.redirect("/urls");
+  // }
+  const templateVars = {user: users[req.cookies["user_id"]]};
+  res.render("register", templateVars);
 });
 
 app.get("/login", (req, res) => {
@@ -130,12 +143,20 @@ app.get("/login", (req, res) => {
     res.redirect("/urls");
     return;
   }
-  res.render("login",{user});
+  // if (req.cookies["user_id"]) {
+  //   return res.redirect("/urls");
+  // }
+  const templateVars = {user: users[req.cookies["user_id"]]};
+  res.render("login", templateVars);
+  // res.render("login",{user});
 });
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  // console.log(hashedPassword);
+
   if (!email || !password) {
     return res.status(403).send("Email or password field cannot be empty");
   }
@@ -143,7 +164,7 @@ app.post("/register", (req, res) => {
     return res.status(403).send("Email already exists!");
   }
   const id = generateRandomString();
-  const user = {id , email, password};
+  const user = {id , email, hashedPassword};
   users[id] = user;
   res.cookie("user_id", id);
   res.redirect("/urls");
@@ -179,12 +200,15 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const loginUser = getUserByEmail(email);
-  if (!loginUser || loginUser.password !== password) {
-    return res.status(403).send("Invalid credentials provided. Please re-enter valid email and password");
-  }
-  res.cookie("user_id", loginUser.id);
-  res.redirect("/urls");
   
+  // console.log(loginUser);
+  if (loginUser && bcrypt.compareSync(password, loginUser.hashedPassword)) {
+    res.cookie("user_id", loginUser.id);
+    res.redirect("/urls");
+    return;
+  }
+  
+  return res.status(403).send("Invalid credentials provided. Please re-enter valid email and password");
 });
   
 app.post("/logout", (req,res) => {
