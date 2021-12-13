@@ -87,19 +87,36 @@ app.get("/urls/:shortURL", (req, res) => {
   
   if (!urlDatabase[shortURL] || !userid) {
     res.send("Please try again!");
-  } else {
+  }
+    if (urlDatabase[shortURL].userID != userid) {
+      res.send("Please try again!");
+    }
+
+  
     const user = users[userid];
     const longURL = urlDatabase[shortURL].longURL;
     const userUrls = urlsForUser(userid, urlDatabase);
     const templateVars = {shortURL, longURL, user, userUrls};
     res.render("urls_show", templateVars);
-  }
+  });
 
-});
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
-  res.redirect(longURL);
+  const userid = req.session.user_id;
+  
+  if (!urlDatabase[shortURL] || !userid) {
+    res.send("Please try again!");
+  }
+    if (urlDatabase[shortURL].userID != userid) {
+      res.send("Please try again!");
+    }
+
+  
+    const user = users[userid];
+    const longURL = urlDatabase[shortURL].longURL;
+    const userUrls = urlsForUser(userid, urlDatabase);
+    const templateVars = {shortURL, longURL, user, userUrls};
+    res.render("urls_show", templateVars);
 });
 
 app.get("/register", (req, res) => {
