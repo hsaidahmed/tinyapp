@@ -1,15 +1,15 @@
 const getUserByEmail = (email, database) => {
-  for(const user in database) {
-    if(database[user].email === email) {
+  for (const user in database) {
+    if (database[user].email === email) {
       return database[user];
     }
   }
   return undefined;
-}
-const urlsForUser =  (id) => {
+};
+const urlsForUser =  (id, database) => {
   const result = {};
-  for (const shortURL in urlDatabase) {
-    const urlObj = urlDatabase[shortURL];
+  for (const shortURL in database) {
+    const urlObj = database[shortURL];
     if (urlObj.userID === id) {
       result[shortURL] = urlObj;
     }
@@ -17,4 +17,4 @@ const urlsForUser =  (id) => {
   return result;
 
 };
-module.exports = {getUserByEmail, urlsForUser}
+module.exports = {getUserByEmail, urlsForUser};

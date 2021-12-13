@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const cookieParser = require("cookie-parser");
 const bcrypt = require('bcryptjs');
-const {getUserByEmail, urlsForUser} = require('./helper.js')
+const {getUserByEmail, urlsForUser} = require('./helper.js');
 
 
 
@@ -42,13 +42,13 @@ const urlDatabase = {
 //     }
 //   }
 //   return null;
-  // const userVal = Object.values(users);
-  // for (const user of userVal) {
-  //   if (user.email === email) {
-  //     return user;
-  //   }
-  // }
-  // return null;
+// const userVal = Object.values(users);
+// for (const user of userVal) {
+//   if (user.email === email) {
+//     return user;
+//   }
+// }
+// return null;
 
 // };
 // const urlsForUser =  (id) => {
@@ -91,7 +91,7 @@ app.get("/urls", (req, res) => {
   // console.log(req.session);
   const userid = req.session.user_id;
   const user = users[userid];
-  const urls = urlsForUser(userid);
+  const urls = urlsForUser(userid, urlDatabase);
   const templateVars = { urls, user };
   console.log(templateVars);
   if (!user) {
@@ -118,7 +118,7 @@ app.get("/urls/:shortURL", (req, res) => {
   } else {
     const user = users[userid];
     const longURL = urlDatabase[shortURL].longURL;
-    const userUrls = urlsForUser(userid);
+    const userUrls = urlsForUser(userid, urlDatabase);
     const templateVars = {shortURL, longURL, user, userUrls};
     res.render("urls_show", templateVars);
   }
