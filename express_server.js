@@ -35,33 +35,7 @@ const urlDatabase = {
   }
 };
 
-// const getUserByEmail = (email, database) => {
-//   for(const user in database) {
-//     if(database[user].email === email) {
-//       return database[user];
-//     }
-//   }
-//   return null;
-// const userVal = Object.values(users);
-// for (const user of userVal) {
-//   if (user.email === email) {
-//     return user;
-//   }
-// }
-// return null;
 
-// };
-// const urlsForUser =  (id) => {
-//   const result = {};
-//   for (const shortURL in urlDatabase) {
-//     const urlObj = urlDatabase[shortURL];
-//     if (urlObj.userID === id) {
-//       result[shortURL] = urlObj;
-//     }
-//   }
-//   return result;
-
-// };
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -87,13 +61,11 @@ app.get("/urls.json", (req, res) => {
 });
  
 app.get("/urls", (req, res) => {
-  // req.session.user_id = req.cookies["user_id"];
-  // console.log(req.session);
+ 
   const userid = req.session.user_id;
   const user = users[userid];
   const urls = urlsForUser(userid, urlDatabase);
   const templateVars = { urls, user };
-  console.log(templateVars);
   if (!user) {
     return res.status(403).render("urls_index",templateVars);
   }
@@ -136,9 +108,6 @@ app.get("/register", (req, res) => {
     res.redirect("/urls");
     return;
   }
-  // if (req.cookies["user_id"]) {
-  //   return res.redirect("/urls");
-  // }
   const templateVars = {user: users[req.session.user_id]};
   res.render("register", templateVars);
 });
@@ -151,19 +120,15 @@ app.get("/login", (req, res) => {
     res.redirect("/urls");
     return;
   }
-  // if (req.cookies["user_id"]) {
-  //   return res.redirect("/urls");
-  // }
+ 
   const templateVars = {user: users[req.session.user_id]};
   res.render("login", templateVars);
-  // res.render("login",{user});
 });
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  // console.log(hashedPassword);
 
   if (!email || !password) {
     return res.status(403).send("Email or password field cannot be empty");
@@ -209,7 +174,6 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   const loginUser = getUserByEmail(email, users);
   
-  // console.log(loginUser);
   if (loginUser && bcrypt.compareSync(password, loginUser.hashedPassword)) {
     req.session.user_id = loginUser.id;
     res.redirect("/urls");
