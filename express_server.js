@@ -6,6 +6,8 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const cookieParser = require("cookie-parser");
 const bcrypt = require('bcryptjs');
+const {getUserByEmail, urlsForUser} = require('./helper.js')
+
 
 
 app.use(morgan("dev"));
@@ -33,34 +35,33 @@ const urlDatabase = {
   }
 };
 
-const getUserByEmail = (email) => {
-  // for(const user in urlDatabase) {
-  //   if(urlDatabase[user].email === email) {
-  //     return urlDatabase[user];
+// const getUserByEmail = (email, database) => {
+//   for(const user in database) {
+//     if(database[user].email === email) {
+//       return database[user];
+//     }
+//   }
+//   return null;
+  // const userVal = Object.values(users);
+  // for (const user of userVal) {
+  //   if (user.email === email) {
+  //     return user;
   //   }
   // }
   // return null;
-  const userVal = Object.values(users);
-  // const user = users[id];
-  for (const user of userVal) {
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
 
-};
-const urlsForUser =  (id) => {
-  const result = {};
-  for (const shortURL in urlDatabase) {
-    const urlObj = urlDatabase[shortURL];
-    if (urlObj.userID === id) {
-      result[shortURL] = urlObj;
-    }
-  }
-  return result;
+// };
+// const urlsForUser =  (id) => {
+//   const result = {};
+//   for (const shortURL in urlDatabase) {
+//     const urlObj = urlDatabase[shortURL];
+//     if (urlObj.userID === id) {
+//       result[shortURL] = urlObj;
+//     }
+//   }
+//   return result;
 
-};
+// };
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -167,7 +168,7 @@ app.post("/register", (req, res) => {
   if (!email || !password) {
     return res.status(403).send("Email or password field cannot be empty");
   }
-  if (getUserByEmail(email)) {
+  if (getUserByEmail(email, users)) {
     return res.status(403).send("Email already exists!");
   }
   const id = generateRandomString();
@@ -206,7 +207,7 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const loginUser = getUserByEmail(email);
+  const loginUser = getUserByEmail(email, users);
   
   // console.log(loginUser);
   if (loginUser && bcrypt.compareSync(password, loginUser.hashedPassword)) {
