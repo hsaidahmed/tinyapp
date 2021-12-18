@@ -6,7 +6,7 @@ const getUserByEmail = (email, database) => {
   }
   return undefined;
 };
-const urlsForUser =  (id, database) => {
+const urlsForUser = (id, database) => {
   const result = {};
   for (const shortURL in database) {
     const urlObj = database[shortURL];
@@ -15,6 +15,11 @@ const urlsForUser =  (id, database) => {
     }
   }
   return result;
-
 };
-module.exports = {getUserByEmail, urlsForUser};
+
+const generateRandomString = () => {
+  return Math.floor((1 + Math.random()) * 0x1000000)
+    .toString(16)
+    .substring(1);
+};
+module.exports = { getUserByEmail, urlsForUser, generateRandomString };
