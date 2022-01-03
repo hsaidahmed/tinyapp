@@ -1,3 +1,4 @@
+// importing external modules
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -14,9 +15,10 @@ app.use(
     secret: "-KaPdSgVkYp2s5v8y/B?E(H+MbQeThWm",
   })
 );
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true })); // enables body parse
 app.set("view engine", "ejs");
 
+// URL database
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -28,6 +30,7 @@ const urlDatabase = {
   },
 };
 
+// User database
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -47,7 +50,7 @@ app.get("/", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
+// Urls page with short URLs and long URLs
 app.get("/urls", (req, res) => {
   const userid = req.session.user_id;
   const user = users[userid];
@@ -58,6 +61,7 @@ app.get("/urls", (req, res) => {
   }
   res.render("urls_index", templateVars);
 });
+// Generates a new short URL from a long URL
 app.get("/urls/new", (req, res) => {
   const userid = req.session.user_id;
   const user = users[userid];
@@ -91,6 +95,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+// Registering new user and password
 app.get("/register", (req, res) => {
   const user = users[req.session.user_id];
   if (user) {
@@ -101,10 +106,11 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+// Logging in with registered username and password 
 app.get("/login", (req, res) => {
   const user = users[req.session.user_id];
   if (user) {
-    res.redirect("/urls");
+    res.redirect("/urls"); // redirecting to urls page when logged in
     return;
   }
   const templateVars = { user: users[req.session.user_id] };
@@ -115,14 +121,15 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-
+// Makes sure email or password field is not empty
   if (!email || !password) {
     return res.status(403).send("Email or password field cannot be empty");
   }
+  // Makes sure an email already registered is not registered again
   if (getUserByEmail(email, users)) {
     return res.status(403).send("Email already exists!");
   }
-  const id = generateRandomString();
+  const id = generateRandomString(); // generating a new short ID for a new user
   const user = { id, email, hashedPassword };
   users[id] = user;
   req.session.user_id = id;
@@ -135,7 +142,7 @@ app.post("/urls", (req, res) => {
     return res.status(403).send("login first!");
   }
   const userID = req.session.user_id;
-  let shortURL = generateRandomString();
+  let shortURL = generateRandomString(); // generates random short ID for the short URL
   let longURL = req.body.longURL;
   urlDatabase[shortURL] = { longURL, userID };
   res.redirect(`/urls/${shortURL}`);
@@ -145,10 +152,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL;
   const userID = req.session.user_id;
   if (urlDatabase[shortURL].userID != userID) {
-    res.send("You cannot delete this URL!");
+    res.send("You cannot delete this URL!"); // cannot delete short URL of other users
     return;
   }
-  delete urlDatabase[shortURL];
+  delete urlDatabase[shortURL]; // deletes short URL 
   res.redirect("/urls");
 });
 
@@ -157,7 +164,7 @@ app.post("/urls/:id", (req, res) => {
   let longURL = req.body.longURL;
   const userID = req.session.user_id;
   if (urlDatabase[shortURL].userID != userID) {
-    res.send("You cannot edit this URL!");
+    res.send("You cannot edit this URL!"); // cannot edit short URL of other users
     return;
   }
   urlDatabase[shortURL].longURL = longURL;
@@ -167,14 +174,14 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const loginUser = getUserByEmail(email, users);
-
+  const loginUser = getUserByEmail(email, users); 
+  // confirms the password of the user is correct
   if (loginUser && bcrypt.compareSync(password, loginUser.hashedPassword)) {
     req.session.user_id = loginUser.id;
     res.redirect("/urls");
     return;
   }
-  return res
+  return res // if incorrect password used to login then invalid message appears
     .status(403)
     .send(
       "Invalid credentials provided. Please re-enter valid email and password"
